@@ -12,6 +12,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import ScrollToTop from "@/components/ScrollToTop";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ChatWidget from "@/components/ChatWidget";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -77,6 +78,7 @@ const AppContent = () => {
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <ChatWidget />}
     </div>
   );
 };
