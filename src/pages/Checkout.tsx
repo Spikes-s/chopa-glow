@@ -94,6 +94,27 @@ const Checkout = () => {
         return;
       }
 
+      // Send order confirmation email if email provided
+      if (formData.email && orderData?.[0]?.id) {
+        try {
+          await supabase.functions.invoke('send-order-email', {
+            body: {
+              customerName: formData.name,
+              customerEmail: formData.email,
+              orderId: orderData[0].id,
+              items: orderItems,
+              total: totalWithWholesale,
+              deliveryType: deliveryMethod,
+              mpesaCode: formData.mpesaCode,
+              emailType: 'order_placed',
+            },
+          });
+        } catch (emailError) {
+          console.error('Email notification error:', emailError);
+          // Don't fail the order if email fails
+        }
+      }
+
       toast.success('Order submitted successfully! We will contact you shortly.');
       clearCart();
       navigate('/');
