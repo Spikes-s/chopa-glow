@@ -127,6 +127,38 @@ const OrdersManager = () => {
         title: 'Success',
         description: 'Order updated successfully',
       });
+
+      // Send email notification for relevant status changes
+      if (currentOrder?.customer_email) {
+        let emailType: string | null = null;
+        
+        if (field === 'payment_status' && value === 'confirmed') {
+          emailType = 'payment_confirmed';
+        } else if (field === 'order_status' && (value === 'ready_for_pickup' || value === 'out_for_delivery')) {
+          emailType = 'order_ready';
+        } else if (field === 'order_status' && value === 'completed') {
+          emailType = 'order_completed';
+        }
+
+        if (emailType) {
+          try {
+            await supabase.functions.invoke('send-order-email', {
+              body: {
+                customerName: currentOrder.customer_name,
+                customerEmail: currentOrder.customer_email,
+                orderId: currentOrder.id,
+                items: Array.isArray(currentOrder.items) ? currentOrder.items : [],
+                total: currentOrder.total,
+                deliveryType: currentOrder.delivery_type,
+                emailType,
+              },
+            });
+          } catch (emailError) {
+            console.error('Email notification error:', emailError);
+          }
+        }
+      }
+
       // Clear new status when interacted with
       setNewOrderIds(prev => {
         const next = new Set(prev);
