@@ -196,8 +196,17 @@ const Checkout = () => {
                         <span className="font-semibold">Delivery</span>
                       </Label>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Free delivery within the Central Business District (CBD)
+                        We deliver across Nairobi and beyond
                       </p>
+                      <div className="mt-2 p-2 rounded bg-accent/10 border border-accent/20">
+                        <p className="text-xs text-accent font-medium">
+                          🎁 FREE Delivery for:
+                        </p>
+                        <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                          <li>• CBD areas (Nairobi Central)</li>
+                          <li>• Orders above Ksh 50,000</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
 

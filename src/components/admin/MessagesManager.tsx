@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
-import { MessageSquare, User, Send, Bell, ChevronRight } from 'lucide-react';
+import { MessageSquare, User, Send, Bell, ChevronRight, Bot, UserCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 
@@ -33,6 +35,8 @@ const MessagesManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [replyMessage, setReplyMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isAiReply, setIsAiReply] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
   const { toast } = useToast();
 
   const fetchMessages = async () => {
@@ -139,6 +143,36 @@ const MessagesManager = () => {
     markAsRead(userId);
   };
 
+  const generateAiReply = async (customerMessage: string) => {
+    setIsAiGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-chat-reply', {
+        body: { message: customerMessage },
+      });
+
+      if (error) throw error;
+      
+      if (data?.reply) {
+        setReplyMessage(data.reply);
+      } else {
+        toast({
+          title: 'AI Response',
+          description: 'Could not generate a response for this query.',
+          variant: 'destructive',
+        });
+      }
+    } catch (err) {
+      console.error('AI reply error:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate AI reply',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
   const sendReply = async () => {
     if (!replyMessage.trim() || !selectedConversation) return;
 
@@ -170,6 +204,19 @@ const MessagesManager = () => {
     setIsSending(false);
   };
 
+  // Auto-generate AI reply when AI mode is on and new message is selected
+  useEffect(() => {
+    if (isAiReply && selectedConvo) {
+      const lastCustomerMsg = [...selectedConvo.messages]
+        .reverse()
+        .find(m => m.sender_type === 'customer');
+      
+      if (lastCustomerMsg && !replyMessage) {
+        generateAiReply(lastCustomerMsg.message);
+      }
+    }
+  }, [isAiReply, selectedConversation]);
+
   const selectedConvo = conversations.find(c => c.user_id === selectedConversation);
 
   if (isLoading) {
@@ -189,6 +236,24 @@ const MessagesManager = () => {
             <MessageSquare className="w-5 h-5" />
             Conversations ({conversations.length})
           </CardTitle>
+          {/* AI Reply Toggle */}
+          <div className="flex items-center justify-between mt-3 p-3 rounded-lg bg-muted/50">
+            <div className="flex items-center gap-2">
+              {isAiReply ? (
+                <Bot className="w-4 h-4 text-primary" />
+              ) : (
+                <UserCircle className="w-4 h-4 text-muted-foreground" />
+              )}
+              <Label htmlFor="ai-reply" className="text-sm font-medium">
+                {isAiReply ? 'AI Reply' : 'Admin Reply'}
+              </Label>
+            </div>
+            <Switch
+              id="ai-reply"
+              checked={isAiReply}
+              onCheckedChange={setIsAiReply}
+            />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[520px]">
@@ -281,9 +346,15 @@ const MessagesManager = () => {
 
               {/* Reply Input */}
               <div className="p-3 border-t border-border/50">
+                {isAiGenerating && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Generating AI response...
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Textarea
-                    placeholder="Type your reply..."
+                    placeholder={isAiReply ? "AI will generate a response..." : "Type your reply..."}
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
                     className="min-h-[60px] resize-none"
@@ -294,16 +365,33 @@ const MessagesManager = () => {
                       }
                     }}
                   />
-                  <Button 
-                    onClick={sendReply} 
-                    disabled={!replyMessage.trim() || isSending}
-                    className="self-end"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    {isAiReply && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const lastMsg = selectedConvo?.messages
+                            .filter(m => m.sender_type === 'customer')
+                            .pop();
+                          if (lastMsg) generateAiReply(lastMsg.message);
+                        }}
+                        disabled={isAiGenerating}
+                      >
+                        <Bot className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={sendReply} 
+                      disabled={!replyMessage.trim() || isSending}
+                      className="self-end"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Press Enter to send, Shift+Enter for new line
+                  {isAiReply ? 'AI mode: Responses are auto-generated for business queries' : 'Press Enter to send, Shift+Enter for new line'}
                 </p>
               </div>
             </CardContent>

@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
+import CategoryCard from '@/components/CategoryCard';
 import { products, categories } from '@/data/products';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, ArrowLeft, Grid3X3 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -16,9 +17,9 @@ import {
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [sortBy, setSortBy] = useState('featured');
-  const [showFilters, setShowFilters] = useState(false);
+  const [showProducts, setShowProducts] = useState(!!searchParams.get('category') || !!searchParams.get('search'));
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products];
@@ -64,24 +65,93 @@ const Products = () => {
     e.preventDefault();
     if (searchQuery) {
       setSearchParams({ search: searchQuery });
+      setShowProducts(true);
     } else {
       setSearchParams({});
     }
   };
 
+  const handleCategoryClick = (categorySlug: string) => {
+    setSelectedCategory(categorySlug);
+    setSearchParams({ category: categorySlug });
+    setShowProducts(true);
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedCategory('all');
+    setSelectedCategory('');
     setSortBy('featured');
     setSearchParams({});
+    setShowProducts(false);
   };
+
+  const backToCategories = () => {
+    setShowProducts(false);
+    setSelectedCategory('');
+    setSearchParams({});
+  };
+
+  // Show categories first
+  if (!showProducts) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
+            Shop Now
+          </h1>
+          <p className="text-muted-foreground">
+            Browse our categories to find what you need
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="glass-card rounded-xl p-4 mb-8">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button type="submit">Search</Button>
+          </form>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleCategoryClick(category.slug)}
+              className="text-left"
+            >
+              <CategoryCard category={category} />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
+        <Button 
+          variant="ghost" 
+          onClick={backToCategories} 
+          className="mb-4 gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Categories
+        </Button>
         <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
-          All Products
+          {selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name || 'Products' : 'All Products'}
         </h1>
         <p className="text-muted-foreground">
           {filteredProducts.length} products available
@@ -106,7 +176,12 @@ const Products = () => {
           </form>
 
           {/* Category Filter */}
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <Select value={selectedCategory || 'all'} onValueChange={(val) => {
+            setSelectedCategory(val === 'all' ? '' : val);
+            if (val !== 'all') {
+              setSearchParams({ category: val });
+            }
+          }}>
             <SelectTrigger className="w-full md:w-[200px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -134,7 +209,7 @@ const Products = () => {
           </Select>
 
           {/* Clear Filters */}
-          {(searchQuery || selectedCategory !== 'all') && (
+          {(searchQuery || selectedCategory) && (
             <Button variant="ghost" onClick={clearFilters} className="shrink-0">
               <X className="w-4 h-4 mr-2" />
               Clear

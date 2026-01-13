@@ -1,7 +1,36 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, MapPin, Clock } from 'lucide-react';
+import { Phone, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 
 const Footer = () => {
+  const [mapLocation, setMapLocation] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMapLocation = async () => {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'map_location')
+        .single();
+      
+      if (data?.value) {
+        setMapLocation(data.value);
+      }
+    };
+    fetchMapLocation();
+  }, []);
+
+  const handleOpenMap = () => {
+    if (mapLocation) {
+      window.open(mapLocation, '_blank');
+    } else {
+      // Default Google Maps location for Nairobi CBD
+      window.open('https://maps.google.com/?q=Nairobi+CBD+Kenya', '_blank');
+    }
+  };
+
   return (
     <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-12">
@@ -63,7 +92,7 @@ const Footer = () => {
           {/* Location */}
           <div>
             <h4 className="font-display font-semibold text-foreground mb-4">Location</h4>
-            <div className="flex items-start gap-2 text-muted-foreground text-sm">
+            <div className="flex items-start gap-2 text-muted-foreground text-sm mb-4">
               <MapPin className="w-4 h-4 mt-0.5 text-primary shrink-0" />
               <div>
                 <p className="mb-2">
@@ -76,6 +105,15 @@ const Footer = () => {
                 </p>
               </div>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleOpenMap}
+              className="gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View in Maps
+            </Button>
           </div>
         </div>
 
