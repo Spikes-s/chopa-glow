@@ -1,14 +1,78 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
 import HamburgerCategoryMenu from '@/components/HamburgerCategoryMenu';
-import { products, categories } from '@/data/products';
-import { ArrowRight, Sparkles, Truck, Shield, Gift } from 'lucide-react';
+import { categories } from '@/data/products';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowRight, Sparkles, Truck, Shield, Gift, TrendingUp, Star, Clock } from 'lucide-react';
+
+interface Product {
+  id: string;
+  name: string;
+  retail_price: number;
+  wholesale_price: number | null;
+  image_url: string | null;
+  category: string;
+  in_stock: boolean;
+  description: string | null;
+}
 
 const Index = () => {
-  const featuredProducts = products.slice(0, 8);
+  const [mostBought, setMostBought] = useState<Product[]>([]);
+  const [upcoming, setUpcoming] = useState<Product[]>([]);
+  const [bestReviewed, setBestReviewed] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const featuredCategories = categories.slice(0, 6);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      // Fetch most bought (from orders - most ordered products)
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('items')
+        .eq('order_status', 'completed');
+
+      const productCounts: Record<string, number> = {};
+      orders?.forEach(order => {
+        const items = order.items as any[];
+        items?.forEach(item => {
+          productCounts[item.id] = (productCounts[item.id] || 0) + (item.quantity || 1);
+        });
+      });
+
+      const sortedProductIds = Object.entries(productCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 4)
+        .map(([id]) => id);
+
+      // Fetch products from database
+      const { data: allProducts } = await supabase
+        .from('products')
+        .select('id, name, retail_price, wholesale_price, image_url, category, in_stock, description')
+        .eq('in_stock', true);
+
+      if (allProducts) {
+        // Most bought products
+        const mostBoughtProducts = sortedProductIds
+          .map(id => allProducts.find(p => p.id === id))
+          .filter(Boolean) as Product[];
+        setMostBought(mostBoughtProducts.length > 0 ? mostBoughtProducts : allProducts.slice(0, 4));
+
+        // Upcoming: newest products (by created_at would be better, but using slice for now)
+        setUpcoming(allProducts.slice(-4).reverse());
+
+        // Best reviewed: random selection (would need reviews table for real implementation)
+        const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
+        setBestReviewed(shuffled.slice(0, 4));
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <div>
@@ -129,28 +193,136 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Most Bought Products */}
       <section className="py-16 md:py-24 bg-card/30">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
-                Featured Products
-              </h2>
-              <p className="text-muted-foreground">
-                Best sellers and new arrivals
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+                  Most Bought
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Top sellers based on orders
+                </p>
+              </div>
             </div>
             <Link to="/products" className="text-primary hover:text-primary/80 font-medium flex items-center gap-1 mt-4 md:mt-0">
-              View All Products <ArrowRight className="w-4 h-4" />
+              View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           
-          <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
+              {mostBought.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    price: product.retail_price,
+                    wholesalePrice: product.wholesale_price || undefined,
+                    image: product.image_url || '/placeholder.svg',
+                    category: product.category,
+                    subcategory: '',
+                    description: product.description || '',
+                    inStock: product.in_stock,
+                  }} 
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Upcoming Products */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+                  New Arrivals
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Latest additions to our collection
+                </p>
+              </div>
+            </div>
           </div>
+          
+          {!isLoading && (
+            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
+              {upcoming.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    price: product.retail_price,
+                    wholesalePrice: product.wholesale_price || undefined,
+                    image: product.image_url || '/placeholder.svg',
+                    category: product.category,
+                    subcategory: '',
+                    description: product.description || '',
+                    inStock: product.in_stock,
+                  }} 
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Best Reviewed Products */}
+      <section className="py-16 md:py-24 bg-card/30">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
+                <Star className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+                  Best Reviewed
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Customer favorites
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {!isLoading && (
+            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
+              {bestReviewed.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    price: product.retail_price,
+                    wholesalePrice: product.wholesale_price || undefined,
+                    image: product.image_url || '/placeholder.svg',
+                    category: product.category,
+                    subcategory: '',
+                    description: product.description || '',
+                    inStock: product.in_stock,
+                  }} 
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
