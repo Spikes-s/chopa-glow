@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Power, RefreshCw, Trash2, Shield, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Power, RefreshCw, Trash2, Shield, CheckCircle, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,8 +16,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-const SUPER_ADMIN_EMAIL = 'superadmin420.co.ke';
-const SUPER_ADMIN_PASSWORD = 'GHOSTMODZTECH101';
+// Super Admin email - password is securely hashed in Supabase Auth (bcrypt)
+const SUPER_ADMIN_EMAIL = 'superadmin@420.co.ke';
 
 interface SiteControlsProps {
   userEmail?: string;
@@ -27,13 +25,55 @@ interface SiteControlsProps {
 
 const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
   const { toast } = useToast();
-  const [isVerified, setIsVerified] = useState(false);
-  const [verifyPassword, setVerifyPassword] = useState('');
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isCheckingRole, setIsCheckingRole] = useState(true);
   const [siteStatus, setSiteStatus] = useState<string>('active');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if user is super admin
-  const isSuperAdmin = userEmail === SUPER_ADMIN_EMAIL;
+  // Check if current user has super_admin role from database
+  useEffect(() => {
+    const checkSuperAdminRole = async () => {
+      setIsCheckingRole(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          setIsSuperAdmin(false);
+          setIsCheckingRole(false);
+          return;
+        }
+
+        // Verify email matches super admin email
+        if (user.email !== SUPER_ADMIN_EMAIL) {
+          setIsSuperAdmin(false);
+          setIsCheckingRole(false);
+          return;
+        }
+
+        // Check for super_admin role in user_roles table
+        const { data: roleData, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'super_admin')
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking super admin role:', error);
+          setIsSuperAdmin(false);
+        } else {
+          setIsSuperAdmin(!!roleData);
+        }
+      } catch (error) {
+        console.error('Error checking super admin status:', error);
+        setIsSuperAdmin(false);
+      } finally {
+        setIsCheckingRole(false);
+      }
+    };
+
+    checkSuperAdminRole();
+  }, [userEmail]);
 
   useEffect(() => {
     const fetchSiteStatus = async () => {
@@ -48,25 +88,10 @@ const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
       }
     };
 
-    fetchSiteStatus();
-  }, []);
-
-  const handleVerify = () => {
-    if (verifyPassword === SUPER_ADMIN_PASSWORD) {
-      setIsVerified(true);
-      toast({
-        title: 'Access Granted',
-        description: 'Super Admin privileges activated',
-      });
-    } else {
-      toast({
-        title: 'Access Denied',
-        description: 'Invalid password',
-        variant: 'destructive',
-      });
+    if (isSuperAdmin) {
+      fetchSiteStatus();
     }
-    setVerifyPassword('');
-  };
+  }, [isSuperAdmin]);
 
   const updateSiteStatus = async (status: string) => {
     setIsLoading(true);
@@ -130,36 +155,14 @@ const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
     }
   };
 
-  if (!isSuperAdmin) {
+  // Show nothing while checking role
+  if (isCheckingRole) {
     return null;
   }
 
-  if (!isVerified) {
-    return (
-      <Card className="border-destructive/50 bg-destructive/5">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <Shield className="w-5 h-5" />
-            Super Admin Access
-          </CardTitle>
-          <CardDescription>
-            Enter your Super Admin password to access system controls
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="Enter Super Admin password"
-              value={verifyPassword}
-              onChange={(e) => setVerifyPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-            />
-            <Button onClick={handleVerify}>Verify</Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  // Don't render if not super admin (role-protected)
+  if (!isSuperAdmin) {
+    return null;
   }
 
   return (
@@ -264,7 +267,7 @@ const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          These controls are only available to the Super Admin account
+          These controls are only available to the Super Admin account ({SUPER_ADMIN_EMAIL})
         </p>
       </CardContent>
     </Card>
