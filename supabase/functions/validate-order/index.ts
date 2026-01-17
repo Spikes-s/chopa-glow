@@ -262,16 +262,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Calculate prices - use database products where available, fall back to client-provided data
     let subtotal = 0;
+    const unavailableItems: string[] = [];
+    
     const orderItems = orderData.items.map(item => {
       const dbProduct = dbProductMap.get(item.id);
       
       if (dbProduct) {
         // Database product - use server-validated prices
         if (dbProduct.in_stock === false) {
-          throw new Error(`Product "${dbProduct.name}" is out of stock`);
+          unavailableItems.push('item');
+          throw new Error('Some items in your order are currently unavailable');
         }
         if (dbProduct.stock_quantity !== null && dbProduct.stock_quantity < item.quantity) {
-          throw new Error(`Insufficient stock for "${dbProduct.name}". Only ${dbProduct.stock_quantity} available.`);
+          throw new Error('Some items have insufficient stock. Please adjust quantities');
         }
 
         const isBraid = dbProduct.category.toLowerCase().includes('braid');
@@ -295,7 +298,7 @@ const handler = async (req: Request): Promise<Response> => {
       } else {
         // Local product - use client-provided data with basic validation
         if (!item.name || !item.price) {
-          throw new Error(`Invalid product data for item: ${item.id}`);
+          throw new Error('Invalid order data. Please refresh and try again');
         }
 
         const isBraid = (item.name || '').toLowerCase().includes('braid');
@@ -373,8 +376,23 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error('Error in validate-order function:', error.message, error.stack);
+    
+    // Map internal errors to generic user-friendly messages
+    let userMessage = 'An error occurred processing your order. Please try again';
+    const errorMsg = (error.message || '').toLowerCase();
+    
+    // Only expose safe, user-action-oriented messages
+    if (errorMsg.includes('unavailable') || errorMsg.includes('out of stock')) {
+      userMessage = 'Some items in your order are currently unavailable';
+    } else if (errorMsg.includes('insufficient stock') || errorMsg.includes('quantities')) {
+      userMessage = 'Some items have insufficient stock. Please adjust quantities';
+    } else if (errorMsg.includes('invalid order data') || errorMsg.includes('refresh')) {
+      userMessage = 'Invalid order data. Please refresh and try again';
+    }
+    // All other errors get generic message - no internal details exposed
+    
     return new Response(
-      JSON.stringify({ success: false, error: error.message || 'An error occurred processing your order' }),
+      JSON.stringify({ success: false, error: userMessage }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }

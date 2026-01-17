@@ -16,10 +16,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-// Super Admin email - password is securely hashed in Supabase Auth (bcrypt)
-// NEVER store passwords in plain text - Supabase Auth handles bcrypt hashing
-const SUPER_ADMIN_EMAIL = 'super@admin.co.ke';
-
 interface SiteControlsProps {
   userEmail?: string;
 }
@@ -31,7 +27,7 @@ const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
   const [siteStatus, setSiteStatus] = useState<string>('active');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if current user has super_admin role from database
+  // Check if current user has super_admin role from database (no email check - role-based only)
   useEffect(() => {
     const checkSuperAdminRole = async () => {
       setIsCheckingRole(true);
@@ -39,13 +35,6 @@ const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          setIsSuperAdmin(false);
-          setIsCheckingRole(false);
-          return;
-        }
-
-        // Verify email matches super admin email
-        if (user.email !== SUPER_ADMIN_EMAIL) {
           setIsSuperAdmin(false);
           setIsCheckingRole(false);
           return;
@@ -268,7 +257,7 @@ const SuperAdminControls = ({ userEmail }: SiteControlsProps) => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          These controls are only available to the Super Admin account ({SUPER_ADMIN_EMAIL})
+          These controls are only available to Super Admin accounts
         </p>
       </CardContent>
     </Card>
