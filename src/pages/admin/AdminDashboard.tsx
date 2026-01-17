@@ -14,6 +14,7 @@ import POSSystem from '@/components/admin/POSSystem';
 import ReturnsManager from '@/components/admin/ReturnsManager';
 import CategoriesManager from '@/components/admin/CategoriesManager';
 import ThemeToggle from '@/components/ThemeToggle';
+import { VisitorCounter } from '@/components/admin/VisitorCounter';
 
 const AdminDashboard = () => {
   const { user, isAdmin, isLoading, signOut } = useAuth();
@@ -46,21 +47,28 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen mirage-bg pt-4 pb-10">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-display font-bold gradient-text">Admin Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Manage your store</p>
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-display font-bold gradient-text">Admin Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Manage your store</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button variant="outline" onClick={() => navigate('/')} className="gap-2">
+                <Home className="w-4 h-4" />
+                View Store
+              </Button>
+              <Button variant="outline" onClick={handleSignOut} className="gap-2">
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button variant="outline" onClick={() => navigate('/')} className="gap-2">
-              <Home className="w-4 h-4" />
-              View Store
-            </Button>
-            <Button variant="outline" onClick={handleSignOut} className="gap-2">
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
+          
+          {/* Visitor Counter */}
+          <div className="flex justify-end">
+            <VisitorCounter />
           </div>
         </div>
 
