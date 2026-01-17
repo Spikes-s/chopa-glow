@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/alert-dialog';
 
 // Super Admin email - password is securely hashed in Supabase Auth (bcrypt)
-const SUPER_ADMIN_EMAIL = 'superadmin@420.co.ke';
+// NEVER store passwords in plain text - Supabase Auth handles bcrypt hashing
+const SUPER_ADMIN_EMAIL = 'super@admin.co.ke';
 
 interface SiteControlsProps {
   userEmail?: string;
