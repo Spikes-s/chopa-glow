@@ -15,6 +15,7 @@ import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
 import TermsAcceptanceModal from "@/components/TermsAcceptanceModal";
 import { useTermsAcceptance } from "@/hooks/useTermsAcceptance";
+import { usePageVisit } from "@/hooks/usePageVisit";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -38,6 +39,9 @@ const AppContent = () => {
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const location = useLocation();
   const { needsAcceptance, isLoading: termsLoading, markAsAccepted } = useTermsAcceptance();
+  
+  // Track page visits
+  usePageVisit();
 
   useEffect(() => {
     // Check if this is the first visit in this session
