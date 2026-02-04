@@ -290,6 +290,57 @@ export type Database = {
         }
         Relationships: []
       }
+      product_reviews: {
+        Row: {
+          created_at: string
+          customer_name: string | null
+          id: string
+          is_approved: boolean | null
+          product_id: string
+          rating: number
+          review_text: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          is_approved?: boolean | null
+          product_id: string
+          rating: number
+          review_text?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          is_approved?: boolean | null
+          product_id?: string
+          rating?: number
+          review_text?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "public_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           additional_images: string[] | null
@@ -298,6 +349,7 @@ export type Database = {
           cost_price: number | null
           created_at: string
           description: string | null
+          display_section: string | null
           expiry_date: string | null
           id: string
           image_url: string | null
@@ -318,6 +370,7 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          display_section?: string | null
           expiry_date?: string | null
           id?: string
           image_url?: string | null
@@ -338,6 +391,7 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          display_section?: string | null
           expiry_date?: string | null
           id?: string
           image_url?: string | null

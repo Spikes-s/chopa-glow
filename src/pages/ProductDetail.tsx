@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { products, isHairExtension } from '@/data/products';
 import { findColor } from '@/data/hairColors';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
@@ -13,23 +14,90 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import ProductReviews from '@/components/ProductReviews';
+
+interface DBProduct {
+  id: string;
+  name: string;
+  description: string | null;
+  retail_price: number;
+  wholesale_price: number | null;
+  wholesale_min_qty: number | null;
+  category: string;
+  subcategory: string | null;
+  image_url: string | null;
+  additional_images: string[] | null;
+  in_stock: boolean | null;
+  variations: any;
+}
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
   
-  const product = products.find((p) => p.id === id);
+  const [dbProduct, setDbProduct] = useState<DBProduct | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Check local data first
+  const localProduct = products.find((p) => p.id === id);
   
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || '');
+  const [selectedSize, setSelectedSize] = useState(localProduct?.sizes?.[0] || '');
   const [selectedColor, setSelectedColor] = useState('');
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+      
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (!error && data) {
+        setDbProduct(data);
+      }
+      setLoading(false);
+    };
+
+    // If not found in local products, try DB
+    if (!localProduct) {
+      fetchProduct();
+    } else {
+      setLoading(false);
+    }
+  }, [id, localProduct]);
+
+  // Use either local or DB product
+  const product = localProduct || (dbProduct ? {
+    id: dbProduct.id,
+    name: dbProduct.name,
+    description: dbProduct.description || '',
+    price: dbProduct.retail_price,
+    wholesalePrice: dbProduct.wholesale_price || 0,
+    category: dbProduct.category,
+    subcategory: dbProduct.subcategory || '',
+    image: dbProduct.image_url || '/placeholder.svg',
+    colors: [],
+    sizes: [],
+    inStock: dbProduct.in_stock ?? true,
+  } : null);
 
   // Determine if product is a hair extension (braid)
   const isExtension = product ? isHairExtension(product) : false;
   
   // Get available colors for the product
-  const availableColors = product?.colors || [];
+  const availableColors = localProduct?.colors || [];
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 flex justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -44,7 +112,7 @@ const ProductDetail = () => {
     );
   }
 
-  const wholesaleThreshold = isExtension ? 10 : 6;
+  const wholesaleThreshold = dbProduct?.wholesale_min_qty || (isExtension ? 10 : 6);
   const isWholesale = quantity >= wholesaleThreshold;
   
   const currentPrice = isWholesale ? product.wholesalePrice : product.price;
@@ -90,8 +158,8 @@ const ProductDetail = () => {
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        {/* Product Image */}
-        <div className="aspect-square rounded-2xl overflow-hidden bg-muted/30 gradient-border">
+        {/* Product Image - Large and Centered on Mobile */}
+        <div className="aspect-square rounded-2xl overflow-hidden bg-muted/30 gradient-border mx-auto max-w-md lg:max-w-none w-full">
           <img
             src={product.image}
             alt={product.name}
@@ -111,7 +179,8 @@ const ProductDetail = () => {
             {product.name}
           </h1>
 
-          <p className="text-muted-foreground mb-6 font-body leading-relaxed">
+          {/* Short Description */}
+          <p className="text-muted-foreground mb-6 font-body leading-relaxed text-sm md:text-base">
             {product.description}
           </p>
 
@@ -151,7 +220,7 @@ const ProductDetail = () => {
           {/* Options */}
           <div className="space-y-4 mb-6">
             {/* Size Selector - for non-extensions */}
-            {!isExtension && product.sizes && product.sizes.length > 0 && (
+            {!isExtension && localProduct?.sizes && localProduct.sizes.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Size
@@ -161,7 +230,7 @@ const ProductDetail = () => {
                     <SelectValue placeholder="Select size" />
                   </SelectTrigger>
                   <SelectContent>
-                    {product.sizes.map((size) => (
+                    {localProduct.sizes.map((size) => (
                       <SelectItem key={size} value={size}>
                         {size}
                       </SelectItem>
@@ -263,11 +332,10 @@ const ProductDetail = () => {
             </span>
           </div>
 
-          {/* Add to Cart */}
+          {/* Add to Cart - Hot Pink Button */}
           <Button
-            variant="gradient"
             size="xl"
-            className="w-full"
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold text-lg py-6"
             onClick={handleAddToCart}
             disabled={!canAddToCart}
           >
@@ -282,6 +350,9 @@ const ProductDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Customer Reviews Section */}
+      <ProductReviews productId={id || ''} />
     </div>
   );
 };
