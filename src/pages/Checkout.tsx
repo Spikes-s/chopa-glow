@@ -318,23 +318,24 @@ const Checkout = () => {
                     Till Number: 4623226
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Please pay the exact amount shown in the order summary, then enter your transaction code below.
+                    Please pay the exact amount shown in the order summary, then paste the full M-Pesa message below.
                   </p>
                 </div>
 
                 <div className="space-y-4 mb-6">
                   <div>
-                    <Label htmlFor="mpesaCode">M-Pesa Transaction Code</Label>
-                    <Input
+                    <Label htmlFor="mpesaCode">Full M-Pesa Confirmation Message</Label>
+                    <Textarea
                       id="mpesaCode"
                       value={formData.mpesaCode}
-                      onChange={(e) => setFormData({ ...formData, mpesaCode: e.target.value.toUpperCase() })}
-                      placeholder="e.g., SJK7XXXXXX"
-                      className="uppercase"
+                      onChange={(e) => setFormData({ ...formData, mpesaCode: e.target.value })}
+                      placeholder="Paste the complete M-Pesa confirmation message here...&#10;&#10;Example: SJK7XXXXXX Confirmed. Ksh1,000.00 paid to CHOPA COSMETICS..."
+                      rows={4}
+                      className="font-mono text-sm"
                       required
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Enter the transaction code from your M-Pesa confirmation message
+                      Copy and paste the entire M-Pesa confirmation SMS you received
                     </p>
                   </div>
                 </div>

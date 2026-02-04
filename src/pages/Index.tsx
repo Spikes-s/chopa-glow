@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
 import HamburgerCategoryMenu from '@/components/HamburgerCategoryMenu';
+import FeaturedProducts from '@/components/FeaturedProducts';
 import { categories } from '@/data/products';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Sparkles, Truck, Shield, Gift, TrendingUp, Star, Clock } from 'lucide-react';
@@ -192,6 +193,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured Products Section */}
+      <FeaturedProducts />
 
       {/* Most Bought Products */}
       <section className="py-16 md:py-24 bg-card/30">
