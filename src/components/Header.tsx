@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X, LogOut, KeyRound, ChevronRight, Loader2 } from 'lucide-react';
+import ChangePasswordDialog from '@/components/ChangePasswordDialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -29,6 +30,7 @@ interface Category {
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { totalItems } = useCart();
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
@@ -51,19 +53,9 @@ const Header = () => {
     navigate('/');
   };
 
-  const handleResetPassword = async () => {
-    if (!user?.email) return;
-    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Check your email', description: 'A password reset link has been sent to your email.' });
-    }
-  };
-
   return (
+    <>
+    <ChangePasswordDialog open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
     <header className="fixed top-0 left-0 right-0 z-40 glass-card border-b border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
@@ -149,9 +141,9 @@ const Header = () => {
                       </DropdownMenuPortal>
                     </DropdownMenuSub>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleResetPassword} className="cursor-pointer">
+                    <DropdownMenuItem onClick={() => setChangePasswordOpen(true)} className="cursor-pointer">
                       <KeyRound className="w-4 h-4 mr-2" />
-                      Reset Password
+                      Change Password
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/auth?mode=login" className="w-full cursor-pointer">
@@ -245,6 +237,7 @@ const Header = () => {
         )}
       </div>
     </header>
+    </>
   );
 };
 
