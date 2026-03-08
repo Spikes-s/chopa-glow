@@ -151,6 +151,57 @@ export type Database = {
           },
         ]
       }
+      bundle_deals: {
+        Row: {
+          bundle_type: string
+          buy_quantity: number | null
+          category_filter: string | null
+          created_at: string | null
+          description: string | null
+          discount_percent: number | null
+          ends_at: string | null
+          get_quantity: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          product_ids: string[] | null
+          starts_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bundle_type?: string
+          buy_quantity?: number | null
+          category_filter?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_percent?: number | null
+          ends_at?: string | null
+          get_quantity?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          product_ids?: string[] | null
+          starts_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bundle_type?: string
+          buy_quantity?: number | null
+          category_filter?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_percent?: number | null
+          ends_at?: string | null
+          get_quantity?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          product_ids?: string[] | null
+          starts_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -211,6 +262,36 @@ export type Database = {
           message?: string
           sender_type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      customer_wallets: {
+        Row: {
+          balance: number
+          created_at: string | null
+          id: string
+          total_earned: number
+          total_spent: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string | null
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string | null
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -372,6 +453,7 @@ export type Database = {
           is_approved: boolean | null
           product_id: string
           rating: number
+          review_images: string[] | null
           review_text: string | null
           updated_at: string
           user_id: string | null
@@ -383,6 +465,7 @@ export type Database = {
           is_approved?: boolean | null
           product_id: string
           rating: number
+          review_images?: string[] | null
           review_text?: string | null
           updated_at?: string
           user_id?: string | null
@@ -394,6 +477,7 @@ export type Database = {
           is_approved?: boolean | null
           product_id?: string
           rating?: number
+          review_images?: string[] | null
           review_text?: string | null
           updated_at?: string
           user_id?: string | null
@@ -701,6 +785,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          id: string
+          order_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
