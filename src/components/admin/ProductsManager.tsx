@@ -145,6 +145,9 @@ const ProductsManager = () => {
       stock_quantity: '0',
       expiry_date: '',
       colors: [],
+      sale_price: '',
+      sale_ends_at: '',
+      sale_label: '',
     });
     setEditingProduct(null);
   };
