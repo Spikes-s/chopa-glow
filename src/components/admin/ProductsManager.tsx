@@ -784,6 +784,44 @@ const ProductsManager = () => {
                 </div>
               )}
 
+              {/* Flash Sale Section */}
+              <div className="space-y-3 p-4 rounded-lg border border-destructive/30 bg-destructive/5">
+                <Label className="flex items-center gap-2 text-destructive font-semibold">
+                  ⚡ Flash Sale (Optional)
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="sale_price" className="text-xs">Sale Price (Ksh)</Label>
+                    <Input
+                      id="sale_price"
+                      type="number"
+                      step="0.01"
+                      value={formData.sale_price}
+                      onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
+                      placeholder="e.g. 800"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="sale_ends_at" className="text-xs">Sale Ends At</Label>
+                    <Input
+                      id="sale_ends_at"
+                      type="datetime-local"
+                      value={formData.sale_ends_at}
+                      onChange={(e) => setFormData({ ...formData, sale_ends_at: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="sale_label" className="text-xs">Sale Label</Label>
+                  <Input
+                    id="sale_label"
+                    value={formData.sale_label}
+                    onChange={(e) => setFormData({ ...formData, sale_label: e.target.value })}
+                    placeholder="e.g. Flash Sale, Weekend Deal"
+                  />
+                </div>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isUploading}>
                 {editingProduct ? 'Update Product' : 'Create Product'}
               </Button>
