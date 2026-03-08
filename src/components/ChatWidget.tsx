@@ -406,7 +406,7 @@ const ChatWidget = () => {
                     </div>
 
                     {/* Input area */}
-                    <form onSubmit={handleSendMessage} className="p-3 border-t border-border/50">
+                    <form id="chat-form" onSubmit={handleSendMessage} className="p-3 border-t border-border/50">
                       <div className="flex gap-2">
                         <Input
                           placeholder="Type a message..."

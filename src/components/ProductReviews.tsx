@@ -122,6 +122,15 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 {review.review_text && (
                   <p className="text-sm text-muted-foreground mt-2">{review.review_text}</p>
                 )}
+                {review.review_images && review.review_images.length > 0 && (
+                  <div className="flex gap-2 mt-3">
+                    {review.review_images.map((img, i) => (
+                      <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="w-16 h-16 rounded-lg overflow-hidden border border-border hover:opacity-80 transition-opacity">
+                        <img src={img} alt="Review photo" className="w-full h-full object-cover" loading="lazy" />
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
