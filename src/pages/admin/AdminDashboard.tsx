@@ -123,6 +123,10 @@ const AdminDashboard = () => {
               <UserCog className="w-4 h-4" />
               <span>Roles</span>
             </TabsTrigger>
+            <TabsTrigger value="bundles" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4">
+              <Gift className="w-4 h-4" />
+              <span>Bundles</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pos" className="space-y-4">
