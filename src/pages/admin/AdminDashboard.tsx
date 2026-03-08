@@ -24,6 +24,7 @@ const AdminDashboard = () => {
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
+  useAdminAutoLogout();
 
   useEffect(() => {
     if (!isLoading && (!user || !isAdmin)) {
