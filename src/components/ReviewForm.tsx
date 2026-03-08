@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, Loader2 } from 'lucide-react';
+import { Star, Loader2, Camera, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -20,22 +20,55 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
   const [reviewText, setReviewText] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length + images.length > 3) {
+      toast.error('Maximum 3 photos allowed');
+      return;
+    }
+    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024 && f.type.startsWith('image/'));
+    if (validFiles.length !== files.length) {
+      toast.error('Only images under 5MB are allowed');
+    }
+    setImages(prev => [...prev, ...validFiles]);
+    validFiles.forEach(f => {
+      const reader = new FileReader();
+      reader.onload = (ev) => setImagePreviews(prev => [...prev, ev.target?.result as string]);
+      reader.readAsDataURL(f);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    const urls: string[] = [];
+    for (const file of images) {
+      const ext = file.name.split('.').pop();
+      const path = `reviews/${productId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from('product-images').upload(path, file);
+      if (!error) {
+        const { data } = supabase.storage.from('product-images').getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+    }
+    return urls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      toast.error('Please sign in to leave a review');
-      return;
-    }
-    
-    if (rating === 0) {
-      toast.error('Please select a rating');
-      return;
-    }
+    if (!user) { toast.error('Please sign in to leave a review'); return; }
+    if (rating === 0) { toast.error('Please select a rating'); return; }
 
     setSubmitting(true);
     try {
+      const reviewImages = images.length > 0 ? await uploadImages() : [];
+
       const { error } = await supabase
         .from('product_reviews')
         .insert({
@@ -44,7 +77,8 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
           customer_name: customerName.trim() || user.email?.split('@')[0] || 'Anonymous',
           rating,
           review_text: reviewText.trim() || null,
-        });
+          review_images: reviewImages,
+        } as any);
 
       if (error) throw error;
 
@@ -52,6 +86,8 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
       setRating(0);
       setReviewText('');
       setCustomerName('');
+      setImages([]);
+      setImagePreviews([]);
       onReviewSubmitted();
     } catch (error: any) {
       toast.error(error.message || 'Failed to submit review');
@@ -113,6 +149,31 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
           placeholder="Share your experience with this product..."
           rows={3}
         />
+      </div>
+
+      {/* Photo Upload */}
+      <div>
+        <Label className="mb-2 block">Add Photos (optional, max 3)</Label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {imagePreviews.map((preview, i) => (
+            <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border">
+              <img src={preview} alt="" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeImage(i)}
+                className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+          {images.length < 3 && (
+            <label className="w-16 h-16 rounded-lg border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center cursor-pointer transition-colors">
+              <Camera className="w-5 h-5 text-muted-foreground" />
+              <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+            </label>
+          )}
+        </div>
       </div>
 
       <Button type="submit" disabled={submitting || rating === 0}>

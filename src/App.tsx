@@ -38,6 +38,8 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import MyOrders from "./pages/MyOrders";
+import Wallet from "./pages/Wallet";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +121,7 @@ const AppContent = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/wallet" element={<Wallet />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
@@ -146,6 +149,7 @@ const AppContent = () => {
       
       {/* Cookie consent banner */}
       {!isAdminRoute && <CookieConsent />}
+      <PWAInstallPrompt />
     </div>
   );
 };

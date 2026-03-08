@@ -12,6 +12,7 @@ interface Review {
   customer_name: string | null;
   rating: number;
   review_text: string | null;
+  review_images: string[] | null;
   created_at: string;
 }
 
@@ -27,7 +28,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   const fetchReviews = async () => {
     const { data, error } = await supabase
       .from('product_reviews')
-      .select('id, customer_name, rating, review_text, created_at')
+      .select('id, customer_name, rating, review_text, review_images, created_at')
       .eq('product_id', productId)
       .eq('is_approved', true)
       .order('created_at', { ascending: false });
@@ -120,6 +121,15 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 </div>
                 {review.review_text && (
                   <p className="text-sm text-muted-foreground mt-2">{review.review_text}</p>
+                )}
+                {review.review_images && review.review_images.length > 0 && (
+                  <div className="flex gap-2 mt-3">
+                    {review.review_images.map((img, i) => (
+                      <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="w-16 h-16 rounded-lg overflow-hidden border border-border hover:opacity-80 transition-opacity">
+                        <img src={img} alt="Review photo" className="w-full h-full object-cover" loading="lazy" />
+                      </a>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

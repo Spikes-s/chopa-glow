@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, LogOut, KeyRound, ChevronRight, Loader2, Package } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, LogOut, KeyRound, ChevronRight, Loader2, Package, Wallet } from 'lucide-react';
 import ChangePasswordDialog from '@/components/ChangePasswordDialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -144,6 +144,12 @@ const Header = () => {
                       <Link to="/my-orders" className="w-full cursor-pointer">
                         <Package className="w-4 h-4 mr-2" />
                         My Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wallet" className="w-full cursor-pointer">
+                        <Wallet className="w-4 h-4 mr-2" />
+                        My Wallet
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
