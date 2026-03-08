@@ -171,6 +171,9 @@ const ProductsManager = () => {
       stock_quantity: product.stock_quantity?.toString() || '0',
       expiry_date: product.expiry_date || '',
       colors: variations?.colors || [],
+      sale_price: (product as any).sale_price?.toString() || '',
+      sale_ends_at: (product as any).sale_ends_at ? new Date((product as any).sale_ends_at).toISOString().slice(0, 16) : '',
+      sale_label: (product as any).sale_label || '',
     });
     setIsDialogOpen(true);
   };
