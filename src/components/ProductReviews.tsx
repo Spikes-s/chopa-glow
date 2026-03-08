@@ -12,6 +12,7 @@ interface Review {
   customer_name: string | null;
   rating: number;
   review_text: string | null;
+  review_images: string[] | null;
   created_at: string;
 }
 
