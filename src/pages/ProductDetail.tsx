@@ -319,6 +319,12 @@ const ProductDetail = () => {
       </div>
 
       <ProductReviews productId={id || ''} />
+
+      <SmartRecommendations 
+        currentProductId={id || ''} 
+        category={product.category}
+        subcategory={product.subcategory}
+      />
     </div>
   );
 };
