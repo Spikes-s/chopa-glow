@@ -91,6 +91,9 @@ const Header = () => {
             {/* Theme Toggle */}
             <ThemeToggle />
 
+            {/* Notifications */}
+            <NotificationBell />
+
             {/* Cart */}
             <Link to="/cart" className="relative">
               <Button variant="ghost" size="icon" className="relative">

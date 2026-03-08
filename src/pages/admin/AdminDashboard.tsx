@@ -172,6 +172,10 @@ const AdminDashboard = () => {
           <TabsContent value="roles" className="space-y-4">
             <RolesManager />
           </TabsContent>
+
+          <TabsContent value="bundles" className="space-y-4">
+            <BundleDealsManager />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
