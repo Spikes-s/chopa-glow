@@ -16,13 +16,25 @@
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GMYZJJS2S"></script>
+    <!-- Google Analytics - only loads if user consented -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3GMYZJJS2S');
+      
+      (function() {
+        var consent = localStorage.getItem('chopa-cookie-consent');
+        if (consent === 'declined') {
+          window['ga-disable-G-3GMYZJJS2S'] = true;
+        }
+        if (consent !== 'declined') {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-3GMYZJJS2S';
+          document.head.appendChild(s);
+          gtag('js', new Date());
+          gtag('config', 'G-3GMYZJJS2S', { 'anonymize_ip': true });
+        }
+      })();
     </script>
   </head>
 

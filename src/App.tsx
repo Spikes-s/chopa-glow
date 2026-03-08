@@ -139,6 +139,9 @@ const AppContent = () => {
           onAccepted={markAsAccepted} 
         />
       )}
+      
+      {/* Cookie consent banner */}
+      {!isAdminRoute && <CookieConsent />}
     </div>
   );
 };
