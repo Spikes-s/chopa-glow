@@ -152,6 +152,8 @@ const ProductsManager = () => {
       sale_price: '',
       sale_ends_at: '',
       sale_label: '',
+      variant_groups: [],
+      named_images: [],
     });
     setEditingProduct(null);
   };
