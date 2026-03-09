@@ -180,6 +180,8 @@ const ProductsManager = () => {
       sale_price: (product as any).sale_price?.toString() || '',
       sale_ends_at: (product as any).sale_ends_at ? new Date((product as any).sale_ends_at).toISOString().slice(0, 16) : '',
       sale_label: (product as any).sale_label || '',
+      variant_groups: variations?.variant_groups || [],
+      named_images: variations?.named_images || [],
     });
     setIsDialogOpen(true);
   };
