@@ -800,6 +800,18 @@ const ProductsManager = () => {
                 </div>
               )}
 
+              {/* Variant Groups (Weight, Capacity, Size, Quantity) */}
+              <VariantManager
+                variantGroups={formData.variant_groups}
+                onChange={(groups) => setFormData({ ...formData, variant_groups: groups })}
+              />
+
+              {/* Named Images for Variant Linking */}
+              <NamedImageUploader
+                namedImages={formData.named_images}
+                onChange={(images) => setFormData({ ...formData, named_images: images })}
+              />
+
               {/* Flash Sale Section */}
               <div className="space-y-3 p-4 rounded-lg border border-destructive/30 bg-destructive/5">
                 <Label className="flex items-center gap-2 text-destructive font-semibold">
