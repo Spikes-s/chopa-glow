@@ -397,10 +397,18 @@ const ProductsManager = () => {
 
     const stockQty = parseInt(formData.stock_quantity) || 0;
     
-    // Build variations object with colors - cast to any for JSON compatibility
-    const variations = formData.colors.length > 0 
-      ? { colors: formData.colors.map(c => ({ name: c.name, hex: c.hex })) } as any
-      : null;
+    // Build variations object - cast to any for JSON compatibility
+    const variations: any = {};
+    if (formData.colors.length > 0) {
+      variations.colors = formData.colors.map(c => ({ name: c.name, hex: c.hex, ...(c as any).hex2 ? { hex2: (c as any).hex2 } : {} }));
+    }
+    if (formData.variant_groups.length > 0) {
+      variations.variant_groups = formData.variant_groups;
+    }
+    if (formData.named_images.length > 0) {
+      variations.named_images = formData.named_images;
+    }
+    const finalVariations = Object.keys(variations).length > 0 ? variations : null;
 
     const productData = {
       name: formData.name,
