@@ -35,7 +35,7 @@ interface CustomColor {
 interface VariantGroup {
   type: string;
   label: string;
-  options: { name: string; image?: string }[];
+  options: { name: string; image?: string; price?: number }[];
 }
 
 interface NamedImage {
@@ -113,6 +113,19 @@ const ProductDetail = () => {
     return null;
   }, [selectedColor, selectedVariants, availableColors, namedImages]);
 
+  // Resolve variant-specific price (first match wins by priority)
+  const variantPrice = useMemo(() => {
+    const priorities = ['weight', 'capacity', 'size', 'quantity'];
+    for (const type of priorities) {
+      const value = selectedVariants[type];
+      if (!value) continue;
+      const group = variantGroups.find(g => g.type === type);
+      const option = group?.options.find(o => o.name === value);
+      if (option?.price && option.price > 0) return option.price;
+    }
+    return null;
+  }, [selectedVariants, variantGroups]);
+
   const handleVariantChange = (type: string, value: string) => {
     setSelectedVariants(prev => ({ ...prev, [type]: value }));
   };
@@ -137,7 +150,8 @@ const ProductDetail = () => {
 
   const wholesaleThreshold = product.wholesale_min_qty || 6;
   const isWholesale = quantity >= wholesaleThreshold;
-  const currentPrice = isWholesale && product.wholesale_price ? product.wholesale_price : product.retail_price;
+  const baseRetailPrice = variantPrice ?? product.retail_price;
+  const currentPrice = isWholesale && product.wholesale_price ? product.wholesale_price : baseRetailPrice;
   const totalPrice = currentPrice * quantity;
 
   const handleAddToCart = () => {
@@ -155,7 +169,7 @@ const ProductDetail = () => {
     addItem({
       id: cartId,
       name: product.name,
-      price: product.retail_price,
+      price: baseRetailPrice,
       wholesalePrice: product.wholesale_price || 0,
       quantity,
       color: selectedColor,
@@ -226,7 +240,8 @@ const ProductDetail = () => {
 
             <div className="mt-4 pt-4 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                <span className="text-foreground font-medium">Retail:</span> Ksh {product.retail_price.toLocaleString()}
+                <span className="text-foreground font-medium">Retail:</span> Ksh {baseRetailPrice.toLocaleString()}
+                {variantPrice && <span className="text-xs ml-1 text-primary">(variant price)</span>}
               </p>
               {product.wholesale_price && (
                 <p className="text-sm text-muted-foreground">
