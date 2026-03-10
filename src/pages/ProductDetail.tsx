@@ -35,7 +35,7 @@ interface CustomColor {
 interface VariantGroup {
   type: string;
   label: string;
-  options: { name: string; image?: string }[];
+  options: { name: string; image?: string; price?: number }[];
 }
 
 interface NamedImage {
