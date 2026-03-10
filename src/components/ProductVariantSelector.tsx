@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 interface VariantOption {
   name: string;
   image?: string;
+  price?: number;
 }
 
 interface VariantGroup {
@@ -34,7 +35,6 @@ const ProductVariantSelector = ({
   if (variantGroups.length === 0) return null;
 
   const getOptionImage = (optionName: string): string | null => {
-    // Check named images for a match
     const match = namedImages.find(
       (img) => img.name.toLowerCase() === optionName.toLowerCase()
     );
@@ -59,20 +59,27 @@ const ProductVariantSelector = ({
                     key={option.name}
                     type="button"
                     onClick={() => onVariantChange(group.type, option.name)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all text-sm font-medium ${
+                    className={`flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl border-2 transition-all text-sm font-medium ${
                       isSelected
                         ? 'border-primary ring-2 ring-primary/30 bg-primary/5 text-foreground'
                         : 'border-border hover:border-primary/50 text-foreground'
                     }`}
                   >
-                    {optImage && (
-                      <img
-                        src={optImage}
-                        alt={option.name}
-                        className="w-8 h-8 rounded object-cover"
-                      />
+                    <div className="flex items-center gap-2">
+                      {optImage && (
+                        <img
+                          src={optImage}
+                          alt={option.name}
+                          className="w-8 h-8 rounded object-cover"
+                        />
+                      )}
+                      <span>{option.name}</span>
+                    </div>
+                    {option.price != null && option.price > 0 && (
+                      <span className="text-xs text-primary font-semibold">
+                        Ksh {option.price.toLocaleString()}
+                      </span>
                     )}
-                    {option.name}
                   </button>
                 );
               })}

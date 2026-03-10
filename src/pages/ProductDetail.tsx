@@ -113,6 +113,19 @@ const ProductDetail = () => {
     return null;
   }, [selectedColor, selectedVariants, availableColors, namedImages]);
 
+  // Resolve variant-specific price (first match wins by priority)
+  const variantPrice = useMemo(() => {
+    const priorities = ['weight', 'capacity', 'size', 'quantity'];
+    for (const type of priorities) {
+      const value = selectedVariants[type];
+      if (!value) continue;
+      const group = variantGroups.find(g => g.type === type);
+      const option = group?.options.find(o => o.name === value);
+      if (option?.price && option.price > 0) return option.price;
+    }
+    return null;
+  }, [selectedVariants, variantGroups]);
+
   const handleVariantChange = (type: string, value: string) => {
     setSelectedVariants(prev => ({ ...prev, [type]: value }));
   };
