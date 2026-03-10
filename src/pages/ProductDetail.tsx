@@ -169,7 +169,7 @@ const ProductDetail = () => {
     addItem({
       id: cartId,
       name: product.name,
-      price: product.retail_price,
+      price: baseRetailPrice,
       wholesalePrice: product.wholesale_price || 0,
       quantity,
       color: selectedColor,
