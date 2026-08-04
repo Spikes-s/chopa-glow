@@ -318,26 +318,8 @@ const Index = () => {
             </div>
           </div>
           
-          {!isLoading && (
-            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-              {bestReviewed.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    price: product.retail_price,
-                    wholesalePrice: product.wholesale_price || undefined,
-                    image: product.image_url || '/placeholder.svg',
-                    category: product.category,
-                    subcategory: '',
-                    description: product.description || '',
-                    inStock: product.in_stock,
-                  }} 
-                />
-              ))}
-            </div>
-          )}
+          <ProductBelt products={upcoming.map(toCardProduct)} isLoading={isLoading} speed={28} reverse />
+
         </div>
       </section>
 
