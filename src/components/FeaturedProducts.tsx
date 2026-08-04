@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import ProductCard from '@/components/ProductCard';
+import ProductBelt from '@/components/ProductBelt';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 interface Product {
