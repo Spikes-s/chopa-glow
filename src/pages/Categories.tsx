@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import CategoryCard from '@/components/CategoryCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface Category {
   id: string;
