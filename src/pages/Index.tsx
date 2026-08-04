@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import ProductCard from '@/components/ProductCard';
+import ProductBelt from '@/components/ProductBelt';
 import CategoryCard from '@/components/CategoryCard';
+import type { Product as CardProduct } from '@/data/products';
+
 
 import FeaturedProducts from '@/components/FeaturedProducts';
 import FlashSales from '@/components/FlashSales';
