@@ -300,7 +300,8 @@ const Index = () => {
             </div>
           </div>
           
-          <ProductBelt products={upcoming.map(toCardProduct)} isLoading={isLoading} speed={28} reverse />
+          <ProductBelt products={bestReviewed.map(toCardProduct)} isLoading={isLoading} speed={40} />
+
 
         </div>
       </section>
