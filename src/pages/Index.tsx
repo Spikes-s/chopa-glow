@@ -252,30 +252,8 @@ const Index = () => {
             </Link>
           </div>
           
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-              {mostBought.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    price: product.retail_price,
-                    wholesalePrice: product.wholesale_price || undefined,
-                    image: product.image_url || '/placeholder.svg',
-                    category: product.category,
-                    subcategory: '',
-                    description: product.description || '',
-                    inStock: product.in_stock,
-                  }} 
-                />
-              ))}
-            </div>
-          )}
+          <ProductBelt products={mostBought.map(toCardProduct)} isLoading={isLoading} speed={34} />
+
         </div>
       </section>
 
