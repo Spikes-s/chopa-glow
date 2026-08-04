@@ -33,6 +33,20 @@ interface Category {
   subcategories: string[];
 }
 
+const toCardProduct = (p: Product): CardProduct => ({
+  id: p.id,
+  name: p.name,
+  price: p.retail_price,
+  wholesalePrice: p.wholesale_price || 0,
+  image: p.image_url || '/placeholder.svg',
+  category: p.category,
+  subcategory: '',
+  description: p.description || '',
+  inStock: p.in_stock,
+});
+
+
+
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [mostBought, setMostBought] = useState<Product[]>([]);
