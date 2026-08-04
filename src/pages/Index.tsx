@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import ProductCard from '@/components/ProductCard';
+import ProductBelt from '@/components/ProductBelt';
 import CategoryCard from '@/components/CategoryCard';
+import type { Product as CardProduct } from '@/data/products';
+
 
 import FeaturedProducts from '@/components/FeaturedProducts';
 import FlashSales from '@/components/FlashSales';
@@ -30,6 +32,20 @@ interface Category {
   image_url: string | null;
   subcategories: string[];
 }
+
+const toCardProduct = (p: Product): CardProduct => ({
+  id: p.id,
+  name: p.name,
+  price: p.retail_price,
+  wholesalePrice: p.wholesale_price || 0,
+  image: p.image_url || '/placeholder.svg',
+  category: p.category,
+  subcategory: '',
+  description: p.description || '',
+  inStock: p.in_stock,
+});
+
+
 
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -252,30 +268,8 @@ const Index = () => {
             </Link>
           </div>
           
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-              {mostBought.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    price: product.retail_price,
-                    wholesalePrice: product.wholesale_price || undefined,
-                    image: product.image_url || '/placeholder.svg',
-                    category: product.category,
-                    subcategory: '',
-                    description: product.description || '',
-                    inStock: product.in_stock,
-                  }} 
-                />
-              ))}
-            </div>
-          )}
+          <ProductBelt products={mostBought.map(toCardProduct)} isLoading={isLoading} speed={34} />
+
         </div>
       </section>
 
@@ -298,26 +292,8 @@ const Index = () => {
             </div>
           </div>
           
-          {!isLoading && (
-            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-              {upcoming.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    price: product.retail_price,
-                    wholesalePrice: product.wholesale_price || undefined,
-                    image: product.image_url || '/placeholder.svg',
-                    category: product.category,
-                    subcategory: '',
-                    description: product.description || '',
-                    inStock: product.in_stock,
-                  }} 
-                />
-              ))}
-            </div>
-          )}
+          <ProductBelt products={upcoming.map(toCardProduct)} isLoading={isLoading} speed={28} reverse />
+
         </div>
       </section>
 
@@ -340,26 +316,9 @@ const Index = () => {
             </div>
           </div>
           
-          {!isLoading && (
-            <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-              {bestReviewed.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    price: product.retail_price,
-                    wholesalePrice: product.wholesale_price || undefined,
-                    image: product.image_url || '/placeholder.svg',
-                    category: product.category,
-                    subcategory: '',
-                    description: product.description || '',
-                    inStock: product.in_stock,
-                  }} 
-                />
-              ))}
-            </div>
-          )}
+          <ProductBelt products={bestReviewed.map(toCardProduct)} isLoading={isLoading} speed={40} />
+
+
         </div>
       </section>
 

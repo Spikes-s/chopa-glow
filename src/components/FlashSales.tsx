@@ -158,11 +158,14 @@ const FlashSales = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
+        <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           {products.map((product) => (
-            <FlashSaleItem key={product.id} product={product} />
+            <div key={product.id} className="w-[190px] sm:w-[230px] md:w-[250px] flex-shrink-0 snap-start">
+              <FlashSaleItem product={product} />
+            </div>
           ))}
         </div>
+
       </div>
     </section>
   );

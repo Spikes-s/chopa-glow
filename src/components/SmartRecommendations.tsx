@@ -70,24 +70,26 @@ const SmartRecommendations = ({ currentProductId, category, subcategory }: Smart
         <h2 className="text-2xl font-display font-bold text-foreground">You May Also Like</h2>
       </div>
 
-      <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
+      <div className="flex gap-4 md:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x">
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={{
-              id: product.id,
-              name: product.name,
-              price: product.retail_price,
-              wholesalePrice: product.wholesale_price || 0,
-              image: product.image_url || '/placeholder.svg',
-              category: product.category,
-              subcategory: product.subcategory || '',
-              description: product.description || '',
-              inStock: product.in_stock,
-            }}
-          />
+          <div key={product.id} className="w-[190px] sm:w-[230px] md:w-[250px] flex-shrink-0 snap-start">
+            <ProductCard
+              product={{
+                id: product.id,
+                name: product.name,
+                price: product.retail_price,
+                wholesalePrice: product.wholesale_price || 0,
+                image: product.image_url || '/placeholder.svg',
+                category: product.category,
+                subcategory: product.subcategory || '',
+                description: product.description || '',
+                inStock: product.in_stock,
+              }}
+            />
+          </div>
         ))}
       </div>
+
     </section>
   );
 };

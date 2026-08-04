@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import ProductCard from '@/components/ProductCard';
+import ProductBelt from '@/components/ProductBelt';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 interface Product {
@@ -91,24 +91,21 @@ const FeaturedProducts = () => {
           </Link>
         </div>
         
-        <div className="flex flex-col gap-4 md:gap-6 max-w-2xl mx-auto">
-          {products.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.retail_price,
-                wholesalePrice: product.wholesale_price || 0,
-                image: product.image_url || '/placeholder.svg',
-                category: product.category,
-                subcategory: product.subcategory || '',
-                description: product.description || '',
-                inStock: product.in_stock,
-              }} 
-            />
-          ))}
-        </div>
+        <ProductBelt
+          speed={30}
+          products={products.map((product) => ({
+            id: product.id,
+            name: product.name,
+            price: product.retail_price,
+            wholesalePrice: product.wholesale_price || 0,
+            image: product.image_url || '/placeholder.svg',
+            category: product.category,
+            subcategory: product.subcategory || '',
+            description: product.description || '',
+            inStock: product.in_stock,
+          }))}
+        />
+
       </div>
     </section>
   );

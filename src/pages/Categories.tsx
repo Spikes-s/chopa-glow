@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import CategoryCard from '@/components/CategoryCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface Category {
   id: string;
@@ -55,7 +57,15 @@ const Categories = () => {
           Explore our complete range of beauty and cosmetic products. From braids to skincare, 
           we have everything you need to look and feel your best.
         </p>
+        <div className="mt-6 flex justify-center">
+          <Button asChild variant="gradient" size="lg">
+            <Link to="/products">
+              Shop All Products <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
       </div>
+
 
       {/* Categories Grid */}
       {isLoading ? (

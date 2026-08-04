@@ -55,8 +55,11 @@ const ProductGallery = ({ mainImage, additionalImages, productName, productDescr
         <img
           src={allImages[activeIndex] || '/placeholder.svg'}
           alt={productName}
-          className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-cover transition-all duration-300 ease-out group-hover:scale-105 ${
+            fadeIn ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-3 scale-[0.98]'
+          }`}
         />
+
         
         {/* Zoom hint */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
