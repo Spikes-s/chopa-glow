@@ -55,7 +55,15 @@ const Categories = () => {
           Explore our complete range of beauty and cosmetic products. From braids to skincare, 
           we have everything you need to look and feel your best.
         </p>
+        <div className="mt-6 flex justify-center">
+          <Button asChild variant="gradient" size="lg">
+            <Link to="/products">
+              Shop All Products <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
       </div>
+
 
       {/* Categories Grid */}
       {isLoading ? (
