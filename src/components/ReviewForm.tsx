@@ -14,17 +14,6 @@ interface ReviewFormProps {
   onReviewSubmitted: () => void;
 }
 
-const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
-  const { user } = useAuth();
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [reviewText, setReviewText] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [justSubmitted, setJustSubmitted] = useState(false);
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
 const ALLOWED_IMAGE_TYPES: Record<string, string> = {
   'image/png': 'png',
