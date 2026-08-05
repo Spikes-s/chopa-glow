@@ -21,6 +21,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { items, totalWithWholesale, clearCart } = useCart();
+  const { find: findLocation } = useDeliveryLocations();
+
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
   const [deliveryLocation, setDeliveryLocation] = useState('cbd');
   const [formData, setFormData] = useState<{
