@@ -35,12 +35,9 @@ const ReviewCard = ({ review, showProductName = false }: ReviewCardProps) => {
       {review.review_images && review.review_images.length > 0 && (
         <div className="mt-3 flex gap-2">
           {review.review_images.map((img, index) => (
-            <a
+            <div
               key={`${review.id}-${index}`}
-              href={img}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-16 w-16 overflow-hidden rounded-lg border border-border transition-opacity hover:opacity-80"
+              className="h-16 w-16 overflow-hidden rounded-lg border border-border"
             >
               <SafeImage
                 src={img}
@@ -49,10 +46,11 @@ const ReviewCard = ({ review, showProductName = false }: ReviewCardProps) => {
                 containerClassName="h-full w-full"
                 loading="lazy"
               />
-            </a>
+            </div>
           ))}
         </div>
       )}
+
     </div>
   );
 };

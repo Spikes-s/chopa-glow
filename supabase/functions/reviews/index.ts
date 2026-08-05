@@ -201,7 +201,7 @@ serve(async (req) => {
           customer_name: customerName,
           rating,
           review_text: reviewText,
-          review_images: reviewImages,
+          review_images: safeImages,
           is_approved: true,
         })
         .select('id, product_id, customer_name, rating, review_text, review_images, created_at, is_approved')
