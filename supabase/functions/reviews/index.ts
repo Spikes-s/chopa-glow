@@ -162,6 +162,26 @@ serve(async (req) => {
 
       const { productId, customerName, rating, reviewText, reviewImages } = parsed.data;
 
+      // Server-side image validation: only our own storage bucket + real raster image content types.
+      const allowedImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
+      const allowedPrefix = `${supabaseUrl}/storage/v1/object/public/product-images/reviews/`;
+      const safeImages: string[] = [];
+      for (const imageUrl of reviewImages) {
+        if (!imageUrl.startsWith(allowedPrefix)) {
+          return json({ success: false, message: 'Invalid review image' }, 400);
+        }
+        try {
+          const head = await fetch(imageUrl, { method: 'HEAD' });
+          const contentType = (head.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+          if (!head.ok || !allowedImageTypes.includes(contentType)) {
+            return json({ success: false, message: 'Review photos must be PNG, JPEG or WEBP images' }, 400);
+          }
+        } catch (_e) {
+          return json({ success: false, message: 'Could not verify review image' }, 400);
+        }
+        safeImages.push(imageUrl);
+      }
+
       const { data: product, error: productError } = await adminClient
         .from('public_products')
         .select('id, name')
@@ -172,6 +192,7 @@ serve(async (req) => {
         return json({ success: false, message: 'Product not found' }, 404);
       }
 
+
       const { data: review, error: insertError } = await adminClient
         .from('product_reviews')
         .insert({
@@ -180,7 +201,7 @@ serve(async (req) => {
           customer_name: customerName,
           rating,
           review_text: reviewText,
-          review_images: reviewImages,
+          review_images: safeImages,
           is_approved: true,
         })
         .select('id, product_id, customer_name, rating, review_text, review_images, created_at, is_approved')
