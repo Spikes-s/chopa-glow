@@ -26,15 +26,51 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+};
+
+// Verify real file content (magic bytes) — MIME type alone is spoofable (e.g. SVG with scripts).
+const sniffImageType = async (file: File): Promise<string | null> => {
+  const buf = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const startsWith = (bytes: number[], offset = 0) => bytes.every((b, i) => buf[offset + i] === b);
+  if (startsWith([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return 'image/png';
+  if (startsWith([0xff, 0xd8, 0xff])) return 'image/jpeg';
+  if (startsWith([0x52, 0x49, 0x46, 0x46]) && startsWith([0x57, 0x45, 0x42, 0x50], 8)) return 'image/webp';
+  return null;
+};
+
+const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
+  const { user } = useAuth();
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [justSubmitted, setJustSubmitted] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + images.length > 3) {
       toast.error('Maximum 3 photos allowed');
       return;
     }
-    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024 && f.type.startsWith('image/'));
+
+    const validFiles: File[] = [];
+    for (const f of files) {
+      if (f.size > 5 * 1024 * 1024) continue;
+      const sniffed = await sniffImageType(f);
+      if (!sniffed || !ALLOWED_IMAGE_TYPES[sniffed]) continue;
+      validFiles.push(f);
+    }
+
     if (validFiles.length !== files.length) {
-      toast.error('Only images under 5MB are allowed');
+      toast.error('Only real PNG, JPEG or WEBP photos under 5MB are allowed');
     }
     setImages(prev => [...prev, ...validFiles]);
     validFiles.forEach(f => {
@@ -52,9 +88,15 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
   const uploadImages = async (): Promise<string[]> => {
     const urls: string[] = [];
     for (const file of images) {
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const sniffed = await sniffImageType(file);
+      const safeType = sniffed && ALLOWED_IMAGE_TYPES[sniffed] ? sniffed : null;
+      if (!safeType) {
+        toast.error('One of your photos was not a valid image and was skipped.');
+        continue;
+      }
+      const ext = ALLOWED_IMAGE_TYPES[safeType];
       const path = `reviews/${productId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: false, contentType: file.type });
+      const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: false, contentType: safeType });
       if (error) {
         console.error('Review image upload failed:', error);
         // Surface to user but don't block submission of the text review
@@ -66,6 +108,7 @@ const ReviewForm = ({ productId, onReviewSubmitted }: ReviewFormProps) => {
     }
     return urls;
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
