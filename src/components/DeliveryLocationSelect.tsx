@@ -1,12 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Truck, Search, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import {
-  DELIVERY_LOCATIONS,
-  DeliveryLocation,
-  searchLocations,
-  findLocation,
-} from '@/data/deliveryLocations';
+import { DELIVERY_LOCATIONS, DeliveryLocation } from '@/data/deliveryLocations';
+import { useDeliveryLocations } from '@/hooks/useDeliveryLocations';
 
 // Re-export for backward compatibility with existing imports
 export { DELIVERY_LOCATIONS };
@@ -25,17 +21,20 @@ interface DeliveryLocationSelectProps {
  * - Type to filter — pick from suggestions to auto-fill.
  * - No matches → offer to save whatever the customer typed as their custom location.
  * - Selected value can be an existing location id OR a custom string.
+ * - Prices come from the admin-managed delivery locations list.
  */
 const DeliveryLocationSelect = ({ value, onChange }: DeliveryLocationSelectProps) => {
-  const knownSelected = findLocation(value);
+  const { locations, find, search } = useDeliveryLocations();
+  const knownSelected = find(value);
   const initialQuery = knownSelected?.name ?? value ?? '';
   const [query, setQuery] = useState(initialQuery);
   const [open, setOpen] = useState(false);
 
   const suggestions = useMemo(() => {
-    if (!query.trim()) return DELIVERY_LOCATIONS.slice(0, 10);
-    return searchLocations(query, 12);
-  }, [query]);
+    if (!query.trim()) return locations.slice(0, 10);
+    return search(query, 12);
+  }, [query, locations, search]);
+
 
   const trimmed = query.trim();
   const isCustom = !!trimmed && !suggestions.some((s) => s.name.toLowerCase() === trimmed.toLowerCase());

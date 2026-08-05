@@ -14,13 +14,15 @@ import { Button } from '@/components/ui/button';
 import { LoadingButton } from '@/components/ui/loading-button';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
 import DeliveryLocationSelect from '@/components/DeliveryLocationSelect';
-import { findLocation } from '@/data/deliveryLocations';
+import { useDeliveryLocations } from '@/hooks/useDeliveryLocations';
 
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { items, totalWithWholesale, clearCart } = useCart();
+  const { find: findLocation } = useDeliveryLocations();
+
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
   const [deliveryLocation, setDeliveryLocation] = useState('cbd');
   const [formData, setFormData] = useState<{
